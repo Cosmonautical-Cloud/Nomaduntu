@@ -1,0 +1,14 @@
+---
+# Nomad's package ships a stub /etc/nomad.d/nomad.hcl - overwrite it rather
+# than adding a second file, since the agent loads every *.hcl in the
+# directory and two conflicting `datacenter`/`server`/`client` stanzas would
+# collide.
+- name: Template Nomad configuration
+  ansible.builtin.template:
+    src: templates/nomad.hcl.j2
+    dest: "{{ nomad_config_dir }}/nomad.hcl"
+    mode: '0644'
+    owner: root
+    group: root
+    validate: nomad config validate %s
+  register: nomad_config_result

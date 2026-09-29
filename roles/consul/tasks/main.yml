@@ -1,7 +1,19 @@
 ---
 - name: Install Consul via APT
   become: true
-  become_exe: sudo.ws
   ansible.builtin.apt:
     name: consul
     state: present
+  register: consul_package_install
+
+- name: Create Consul directories
+  become: true
+  ansible.builtin.import_tasks: directories.yml
+
+- name: Apply Consul configuration
+  become: true
+  ansible.builtin.import_tasks: configuration.yml
+
+- name: Manage Consul service
+  become: true
+  ansible.builtin.import_tasks: service.yml

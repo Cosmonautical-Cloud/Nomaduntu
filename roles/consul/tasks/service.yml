@@ -1,0 +1,17 @@
+---
+- name: Reload systemd daemon
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+- name: Restart Consul (config or package changed)
+  ansible.builtin.systemd_service:
+    name: consul
+    enabled: true
+    state: restarted
+  when: consul_config_result.changed or consul_package_install.changed | default(false)
+
+- name: Ensure Consul is running
+  ansible.builtin.systemd_service:
+    name: consul
+    enabled: true
+    state: started

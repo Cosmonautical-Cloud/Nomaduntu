@@ -1,14 +1,12 @@
 ---
 - name: Update APT Cache and Upgrade Packages
   become: true
-  become_exe: sudo.ws
   ansible.builtin.apt:
     update_cache: true
     upgrade: dist
 
 - name: Install additional packages
   become: true
-  become_exe: sudo.ws
   ansible.builtin.apt:
     name: "{{ item }}"
     state: present

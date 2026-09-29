@@ -1,0 +1,17 @@
+---
+- name: Reload systemd daemon
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+- name: Restart Nomad (config or package changed)
+  ansible.builtin.systemd_service:
+    name: nomad
+    enabled: true
+    state: restarted
+  when: nomad_config_result.changed or nomad_package_install.changed | default(false)
+
+- name: Ensure Nomad is running
+  ansible.builtin.systemd_service:
+    name: nomad
+    enabled: true
+    state: started

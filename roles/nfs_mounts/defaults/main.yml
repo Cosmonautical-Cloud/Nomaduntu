@@ -1,0 +1,22 @@
+---
+# Deliberately opt-in per host via nfs_mounts_shares in inventory - see
+# Nomadintosh's roles/nfs_mounts/defaults/main.yml for the reasoning
+# (mirrored here for the Ubuntu side).
+nfs_mounts_shares: []
+
+# Same NAS as the cosmonautical/jellify macOS hosts (10.10.37.32, see
+# Nomadintosh's group_vars/all.yml nas_host).
+nas_host: 10.10.37.32
+
+# UNAS Pro only speaks NFSv3 - confirmed on the macOS side 2026-09-21, same
+# NAS here.
+nfs_mounts_version: 3
+nfs_mounts_rsize: 65536
+nfs_mounts_wsize: 65536
+
+# RPC timeout in tenths of a second before retransmit - same tuning as the
+# macOS mounts (nfs_mounts_timeo in Nomadintosh), raised from the kernel
+# default of 7 (0.7s) so a slow-but-alive NAS under concurrent load doesn't
+# get piled on with redundant retransmits.
+nfs_mounts_timeo: 100
+nfs_mounts_retrans: 3

@@ -1,11 +1,18 @@
 ---
 - name: Download Hashicorp GPG Key
   become: true
-  become_exe: sudo.ws
   ansible.builtin.get_url:
     url: "{{ apt_repo_gpg_key_url }}"
-    dest: "{{ apt_repo_keyring_path }}"
+    dest: "{{ apt_repo_keyring_path }}.asc"
     mode: "0644"
+  register: apt_repo_gpg_key_download
+
+- name: Dearmor Hashicorp GPG Key
+  become: true
+  ansible.builtin.command:
+    cmd: "gpg --batch --yes --dearmor -o {{ apt_repo_keyring_path }} {{ apt_repo_keyring_path }}.asc"
+  when: apt_repo_gpg_key_download.changed
+  changed_when: true
 
 - name: Get dpkg architecture
   ansible.builtin.command: dpkg --print-architecture
@@ -14,7 +21,6 @@
 
 - name: Add Hashicorp APT Repository
   become: true
-  become_exe: sudo.ws
   ansible.builtin.apt_repository:
     # repo: "deb [arch={{ apt_repo_dpkg_arch.stdout }} signed-by={{ apt_repo_keyring_path }}] {{ apt_repo_url }} {{ ansible_facts['lsb']['codename'] }} main"
     repo: "deb [arch={{ apt_repo_dpkg_arch.stdout }} signed-by={{ apt_repo_keyring_path }}] {{ apt_repo_url }} noble main"

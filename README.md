@@ -23,6 +23,9 @@ Hosts are organised into named groups; the group name becomes the Consul/Nomad [
 | Variable | Values | Purpose |
 |---|---|---|
 | `server.enabled` | `true` / _(absent)_ | Configures the host as a Nomad/Consul server |
+| `docker.enabled` | `true` / _(absent)_ | Installs Docker Engine and enables the Nomad `docker` plugin |
+| `nfs_mounts_shares` | list of `{name, export, mount_point}` | NFS shares to mount from `nas_host` (see `roles/nfs_mounts/defaults/main.yml`) |
+| `volumes` | list of `{name, path}` | Nomad host volumes to declare in `client { }`, typically pointed at an `nfs_mounts_shares` mount point |
 
 Example host definition:
 
@@ -31,9 +34,21 @@ node1.example.com:
   server:
     enabled: true
 
-node2.example.com: {}
+node2.example.com:
+  docker:
+    enabled: true
+  nfs_mounts_shares:
+    - name: Shared
+      export: /var/nfs/shared/Shared
+      mount_point: /mnt/shared
+  volumes:
+    - name: Shared
+      path: /mnt/shared
+
 node3.example.com: {}
 ```
+
+Nomad's `datacenter` is derived from the host's inventory group name and is purely a job-placement tag. Consul's `datacenter` is separate and fixed cluster-wide via `existing_consul_datacenter` (`inventory/group_vars/all.yml`) — every host in this inventory is a client-only node that joins an existing Consul/Nomad control plane (`existing_cluster_servers`) managed by a separate Ansible project, rather than bootstrapping its own.
 
 ## Running the playbook
 
@@ -54,10 +69,13 @@ ansible-playbook -i inventory/hosts.yml playbooks/nomaduntu.yml --limit <hostnam
 For every host, the playbook performs the following steps:
 
 1. **Facts** — asserts the host is running Ubuntu and sets the `datacenter` fact derived from the host's inventory group name.
-2. **Consul** — creates config/data directories, installs Consul via the HashiCorp apt repository, templates [`server.hcl`](https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file) with datacenter, node name, server/client mode, and [`retry_join`](https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#retry_join) derived from inventory, and registers a systemd service.
-3. **Nomad** — creates config/data directories, installs Nomad via the HashiCorp apt repository, templates [`server.hcl`](https://developer.hashicorp.com/nomad/docs/configuration) (including [`bootstrap_expect`](https://developer.hashicorp.com/nomad/docs/configuration/server#bootstrap_expect) and [`retry_join`](https://developer.hashicorp.com/nomad/docs/configuration/server_join)), and registers a systemd service.
+2. **APT repository/update** — adds the HashiCorp apt repository and updates/upgrades packages.
+3. **Docker** _(optional, `docker.enabled: true`)_ — installs Docker Engine, enables the service, and adds `ansible_user` to the `docker` group.
+4. **NFS mounts** _(optional, `nfs_mounts_shares`)_ — mounts NFS shares from `nas_host` at the given mount points via `/etc/fstab`.
+5. **Consul** — creates config/data directories, installs Consul via the HashiCorp apt repository, templates [`consul.hcl`](https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file) with datacenter, node name, server/client mode, and [`retry_join`](https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#retry_join) derived from inventory, validates it, and registers a systemd service.
+6. **Nomad** — creates config/data directories, installs Nomad via the HashiCorp apt repository, templates [`nomad.hcl`](https://developer.hashicorp.com/nomad/docs/configuration) (including [`bootstrap_expect`](https://developer.hashicorp.com/nomad/docs/configuration/server#bootstrap_expect), [`retry_join`](https://developer.hashicorp.com/nomad/docs/configuration/server_join), the `docker` plugin when enabled, and any declared `volumes` as host volumes), validates it, and registers a systemd service.
 
-Services are managed as systemd units (Nomad and Consul).
+Services are managed as systemd units (Nomad and Consul), and are only restarted when their config or package actually changed.
 
 ## Remarks
 

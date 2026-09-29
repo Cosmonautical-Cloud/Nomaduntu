@@ -1,0 +1,29 @@
+{# This is a client-only node joining the existing cluster's control plane.
+   existing_cluster_servers (inventory/group_vars/all.yml) is the source of
+   truth for that control plane - it lives in a separate Ansible project
+   (Nomadintosh) that manages cassiopeia/taurus/betelgeuse, so it isn't
+   derivable from this inventory. Any host in *this* inventory marked
+   server.enabled: true is also folded in, in case this group ever grows its
+   own local servers. #}
+{% set ns = namespace(servers=[]) %}
+{% for host in groups['all'] %}
+{%   if 'server' in hostvars[host] and hostvars[host]['server'] is mapping and hostvars[host]['server']['enabled'] | default(false) %}
+{%     set ns.servers = ns.servers + [host] %}
+{%   endif %}
+{% endfor %}
+{% set retry_join_hosts = (ns.servers + existing_cluster_servers) | unique %}
+datacenter = "{{ existing_consul_datacenter }}"
+node_name  = "{{ inventory_hostname_short }}"
+data_dir   = "{{ consul_working_dir }}"
+
+server = {{ server.enabled | default(false) | lower }}
+{% if server.enabled | default(false) %}
+bootstrap_expect = {{ ns.servers | length }}
+{% endif %}
+ui = {{ server.enabled | default(false) | lower }}
+
+bind_addr      = "0.0.0.0"
+client_addr    = "0.0.0.0"
+advertise_addr = "{{ ansible_facts['default_ipv4']['address'] }}"
+
+retry_join = ["{{ retry_join_hosts | join('", "') }}"]

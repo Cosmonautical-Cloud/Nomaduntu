@@ -6,22 +6,46 @@
     - name: Gate Nomaduntu deployment to Debian-based systems
       when: ansible_facts['os_family'] == 'Debian'
       block:
+        - name: Set datacenter fact
+          ansible.builtin.include_role:
+            name: facts
+          tags:
+            - facts
+
         - name: Include APT Repository
           ansible.builtin.include_role:
             name: apt_repo
-          when: ansible_facts['os_family'] == 'Debian'
+          tags:
+            - apt_repo
 
         - name: Include APT Update
           ansible.builtin.include_role:
             name: apt_update
-          when: ansible_facts['os_family'] == 'Debian'
+          tags:
+            - apt_update
 
-        - name: Include Nomad role
+        - name: Include Docker role
           ansible.builtin.include_role:
-            name: nomad
-          when: ansible_facts['os_family'] == 'Debian'
+            name: docker
+          when: docker.enabled | default(false)
+          tags:
+            - docker
+            - container-runtime
+
+        - name: Mount NFS shares
+          ansible.builtin.include_role:
+            name: nfs_mounts
+          tags:
+            - nfs_mounts
 
         - name: Include Consul role
           ansible.builtin.include_role:
             name: consul
-          when: ansible_facts['os_family'] == 'Debian'
+          tags:
+            - consul
+
+        - name: Include Nomad role
+          ansible.builtin.include_role:
+            name: nomad
+          tags:
+            - nomad

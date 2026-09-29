@@ -1,0 +1,73 @@
+{# Nomad's own "datacenter" is just a job-placement tag - it's this host's
+   inventory group name, distinct from Consul's datacenter (see
+   consul.hcl.j2), which always points at the shared control plane. #}
+{% set datacenter = group_names | reject('equalto', 'all') | reject('equalto', 'ungrouped') | first %}
+{% set ns = namespace(servers=[]) %}
+{% for host in groups['all'] %}
+{%   if 'server' in hostvars[host] and hostvars[host]['server'] is mapping and hostvars[host]['server']['enabled'] | default(false) %}
+{%     set ns.servers = ns.servers + [host] %}
+{%   endif %}
+{% endfor %}
+{% set retry_join_hosts = (ns.servers + existing_cluster_servers) | unique %}
+datacenter = "{{ datacenter }}"
+name       = "{{ inventory_hostname }}"
+
+data_dir   = "{{ nomad_working_dir }}"
+bind_addr  = "0.0.0.0"
+retry_join = ["{{ retry_join_hosts | join('", "') }}"]
+
+server {
+  enabled = {{ server.enabled | default(false) | lower }}
+{% if server.enabled | default(false) %}
+  bootstrap_expect = {{ ns.servers | length }}
+{% endif %}
+}
+
+client {
+  enabled = true
+
+  preferred_address_family = "ipv4"
+
+  {% if volumes is defined and volumes | length > 0 %}
+  {% for volume in volumes %}
+  host_volume "{{ volume.name }}" {
+    path = "{{ volume.path }}"
+  }
+  {% endfor %}
+  {% endif %}
+
+  node_class = "worker"
+}
+
+plugin "raw_exec" {
+  config { enabled = true }
+}
+
+{% if docker.enabled | default(false) %}
+plugin "docker" {
+  config {
+    endpoint = "unix:///var/run/docker.sock"
+    allow_privileged = false
+
+    gc {
+      image     = true
+      container = true
+    }
+
+    volumes {
+      enabled = true
+    }
+  }
+}
+{% endif %}
+
+# Service discovery
+consul {
+  address = "127.0.0.1:8500"
+}
+
+# Optional but handy for debugging
+telemetry {
+  publish_allocation_metrics = true
+  publish_node_metrics       = true
+}

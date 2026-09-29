@@ -1,0 +1,16 @@
+---
+- name: Ensure Consul config directory exists
+  ansible.builtin.file:
+    path: "{{ consul_config_dir }}"
+    state: directory
+    mode: '0755'
+    owner: consul
+    group: consul
+
+- name: Ensure Consul working directory exists
+  ansible.builtin.file:
+    path: "{{ consul_working_dir }}"
+    state: directory
+    mode: '0750'
+    owner: consul
+    group: consul

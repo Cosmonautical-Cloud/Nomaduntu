@@ -1,0 +1,10 @@
+---
+- name: Template Consul configuration
+  ansible.builtin.template:
+    src: templates/consul.hcl.j2
+    dest: "{{ consul_config_dir }}/consul.hcl"
+    mode: '0640'
+    owner: consul
+    group: consul
+    validate: consul validate %s
+  register: consul_config_result
