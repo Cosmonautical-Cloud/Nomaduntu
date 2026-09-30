@@ -1,0 +1,6 @@
+---
+galaxy_info:
+  author: Violet Caulfield
+  description: Updates the APT package cache and performs a full distribution upgrade on the target host.
+  license: GPL-3.0-only
+dependencies: []

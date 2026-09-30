@@ -1,0 +1,6 @@
+---
+galaxy_info:
+  author: Violet Caulfield
+  description: Sets the datacenter fact used by the nomad and consul roles.
+  license: GPL-3.0-only
+dependencies: []

@@ -1,0 +1,6 @@
+---
+galaxy_info:
+  author: Violet Caulfield
+  description: Installs and configures Consul as a systemd service on an Ubuntu host.
+  license: GPL-3.0-only
+dependencies: []

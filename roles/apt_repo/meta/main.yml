@@ -1,0 +1,6 @@
+---
+galaxy_info:
+  author: Violet Caulfield
+  description: Adds the Hashicorp APT repository to an Ubuntu host so that packages like Consul and Nomad can be installed via apt.
+  license: GPL-3.0-only
+dependencies: []

@@ -1,0 +1,6 @@
+---
+galaxy_info:
+  author: Violet Caulfield
+  description: Installs Docker Engine on an Ubuntu host so Nomad can run containerised jobs via its docker plugin.
+  license: GPL-3.0-only
+dependencies: []
