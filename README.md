@@ -85,3 +85,4 @@ Services are managed as systemd units (Nomad and Consul), and are only restarted
 
 - **Platform** — This playbook is tested against Ubuntu 24.04 LTS. Other Ubuntu versions may work but are untested.
 - **Companion project** — [Nomadintosh](https://github.com/anultravioletaurora/Nomadintosh) is the macOS counterpart to this playbook. Nomad's multi-platform support means both clusters can participate in the same datacenter if desired.
+- **Parent project** — [Nomadable](https://github.com/anultravioletaurora/Nomadable) composes this playbook with Nomadintosh into one deployment, dispatching each inventory host to the right child playbook by OS so a single mixed macOS/Ubuntu cluster can be deployed in one run. This is the actual deploy path in practice — running this repo's own `ansible-playbook`/`deploy.zsh` standalone (as described above) still works for Ubuntu-only changes, but Nomadable is what's normally invoked.
