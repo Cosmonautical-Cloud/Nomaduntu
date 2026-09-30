@@ -1,0 +1,4 @@
+---
+config_dir: /etc
+
+working_dir: /opt
