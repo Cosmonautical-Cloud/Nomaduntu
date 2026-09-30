@@ -75,20 +75,17 @@ Variables defined directly under a hostname override any group-level `vars` for 
 |----------|---------|-------------|
 | `server.enabled` | `false` | Configures the host as a Nomad/Consul server node |
 | `docker.enabled` | `false` | Installs Docker Engine and enables the Nomad `docker` plugin |
-| `nfs_mounts_shares` | _(absent)_ | List of `{name, export, mount_point}` NFS shares to mount (see below) |
+| `nfs_mounts_shares` | _(absent)_ | List of `{share_export_path}` NFS shares to mount (see below) |
 | `volumes` | _(absent)_ | List of host volumes to expose to the Nomad client (see below) |
 
 #### `nfs_mounts_shares` format
 
-Each entry needs `name` and `export`; `mount_point` is optional and defaults to `nfs_mounts_default_dir` (`/mnt`) + `/<name>`:
+Each entry needs only `share_export_path`; the mount point is always `volume_mount_path` (`/mnt`) + `/<name>`, `<name>` being `share_export_path`'s final path component, lowercased. Not overridable per-share. Define it once under a group's `vars:` when every host in the group mounts the same shares, rather than repeating the list per host:
 
 ```yaml
 nfs_mounts_shares:
-  - name: Shared
-    export: /var/nfs/shared/Shared
-    mount_point: /mnt/shared   # explicit
-  - name: Jellify
-    export: /var/nfs/shared/Jellify   # defaults to /mnt/Jellify
+  - share_export_path: /var/nfs/shared/Shared    # mounts at /mnt/shared
+  - share_export_path: /var/nfs/shared/Jellify   # mounts at /mnt/jellify
 ```
 
 #### `volumes` format
@@ -98,7 +95,7 @@ The `volumes` variable accepts a list of objects with `name` and `path` keys. Ea
 ```yaml
 volumes:
   - name: Jellify
-    path: /mnt/Jellify
+    path: /mnt/jellify
 ```
 
 ---
@@ -121,16 +118,16 @@ all:
       - betelgeuse.cosmonautical.cloud
 
 jellify:
+  vars:
+    nfs_mounts_shares:
+      - share_export_path: /var/nfs/shared/Jellify
   hosts:
     kepler.jellify.app:
       docker:
         enabled: true
-      nfs_mounts_shares:
-        - name: Jellify
-          export: /var/nfs/shared/Jellify
       volumes:
         - name: Jellify
-          path: /mnt/Jellify
+          path: /mnt/jellify
 ```
 
 In this example, `kepler` is a Nomad client only (no `server.enabled`) in the `jellify` Nomad datacenter, but its Consul agent joins the existing `cosmonautical` Consul datacenter/servers instead of bootstrapping an isolated one of its own.

@@ -24,7 +24,7 @@ Hosts are organised into named groups; the group name becomes the Consul/Nomad [
 |---|---|---|
 | `server.enabled` | `true` / _(absent)_ | Configures the host as a Nomad/Consul server |
 | `docker.enabled` | `true` / _(absent)_ | Installs Docker Engine and enables the Nomad `docker` plugin |
-| `nfs_mounts_shares` | list of `{name, export, mount_point?}` | NFS shares to mount from `nas_host` (see `roles/nfs_mounts/defaults/main.yml`). `mount_point` is optional — defaults to `nfs_mounts_default_dir` (`/mnt`) + `/<name>` |
+| `nfs_mounts_shares` | list of `{share_export_path}` | NFS shares to mount from `nas_host` (see `roles/nfs_mounts/defaults/main.yml`). Mount point is always `volume_mount_path` (`/mnt`) + `/<name>`, `<name>` being `share_export_path`'s final path component, lowercased |
 | `volumes` | list of `{name, path}` | Nomad host volumes to declare in `client { }`, typically pointed at an `nfs_mounts_shares` mount point |
 
 Example host definition:
@@ -38,16 +38,13 @@ node2.example.com:
   docker:
     enabled: true
   nfs_mounts_shares:
-    - name: Shared
-      export: /var/nfs/shared/Shared
-      mount_point: /mnt/shared
-    - name: Jellify         # mount_point omitted - defaults to /mnt/Jellify
-      export: /var/nfs/shared/Jellify
+    - share_export_path: /var/nfs/shared/Shared    # mounts at /mnt/shared
+    - share_export_path: /var/nfs/shared/Jellify   # mounts at /mnt/jellify
   volumes:
     - name: Shared
       path: /mnt/shared
     - name: Jellify
-      path: /mnt/Jellify
+      path: /mnt/jellify
 
 node3.example.com: {}
 ```

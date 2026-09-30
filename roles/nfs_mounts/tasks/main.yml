@@ -1,9 +1,6 @@
 ---
-# Plain fstab-backed mount via ansible.posix.mount, not a watchdog daemon
-# like Nomadintosh's LaunchDaemon - Linux's own NFS client already retries
-# per the timeo/retrans options below, and _netdev defers the mount until
-# networking is up on boot, so a separate always-on watchdog isn't needed
-# here the way it was to work around macOS's mount_nfs behavior.
+# See README.md for why this is a plain fstab mount rather than a watchdog
+# daemon like Nomadintosh's.
 - name: Manage NFS mounts
   when: nfs_mounts_shares | length > 0
   become: true
@@ -15,20 +12,20 @@
 
     - name: Ensure NFS mount points exist
       ansible.builtin.file:
-        path: "{{ item.mount_point | default(nfs_mounts_default_dir + '/' + item.name) }}"
+        path: "{{ volume_mount_path }}/{{ item.share_export_path | basename | lower }}"
         state: directory
         mode: '0755'
       loop: "{{ nfs_mounts_shares }}"
       loop_control:
-        label: "{{ item.mount_point | default(nfs_mounts_default_dir + '/' + item.name) }}"
+        label: "{{ volume_mount_path }}/{{ item.share_export_path | basename | lower }}"
 
     - name: Mount NFS shares
       ansible.posix.mount:
-        src: "{{ nas_host }}:{{ item.export }}"
-        path: "{{ item.mount_point | default(nfs_mounts_default_dir + '/' + item.name) }}"
+        src: "{{ nas_host }}:{{ item.share_export_path }}"
+        path: "{{ volume_mount_path }}/{{ item.share_export_path | basename | lower }}"
         fstype: nfs
         opts: "nfsvers={{ nfs_mounts_version }},rsize={{ nfs_mounts_rsize }},wsize={{ nfs_mounts_wsize }},timeo={{ nfs_mounts_timeo }},retrans={{ nfs_mounts_retrans }},_netdev"
         state: mounted
       loop: "{{ nfs_mounts_shares }}"
       loop_control:
-        label: "{{ item.mount_point | default(nfs_mounts_default_dir + '/' + item.name) }}"
+        label: "{{ volume_mount_path }}/{{ item.share_export_path | basename | lower }}"

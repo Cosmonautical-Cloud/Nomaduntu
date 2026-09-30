@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project follows [semantic versioning](https://semver.org/).
 
+## [1.3.1] - 2026-09-29
+
+### Changed
+
+- **Breaking:** `nfs_mounts_shares` entries now take only `share_export_path` (renamed from `export`). `name` and `mount_point` are gone — the mount point is always `volume_mount_path` (renamed from `nfs_mounts_default_dir`, still `/mnt`) + `/<name>`, with `<name>` derived from `share_export_path`'s final path component and lowercased. Existing inventory entries need updating: `{name, export, mount_point?}` → `{share_export_path}`. Mirrors the same change in Nomadintosh, except Nomadintosh keeps the derived name's original casing (to match its SMB-migration paths) while this role lowercases it (no equivalent casing convention to match on Linux).
+
 ## [1.3.0] - 2026-09-29
 
 ### Added
