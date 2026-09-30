@@ -8,6 +8,10 @@ An Ansible playbook for deploying [Nomad](https://developer.hashicorp.com/nomad/
 
 **[Consul](https://developer.hashicorp.com/consul/docs)** is a service mesh and service discovery tool, also by HashiCorp. It provides a distributed key-value store, health checking, and DNS-based service discovery. Nomad integrates with Consul natively to handle cluster membership and service registration.
 
+## Scope
+
+This playbook (like its [Nomadintosh](https://github.com/anultravioletaurora/Nomadintosh) counterpart and the [Nomadable](https://github.com/anultravioletaurora/Nomadable) parent that composes them) provisions the Nomad + Consul **agents** themselves — it does not deploy the job specs those agents run. Job specs live in dedicated repos: [`Jellify/Nomad-Jobs`](https://github.com/anultravioletaurora/Nomad-Jobs) (Terraform-managed) and a legacy hand-deployed `nomad-jobs` repo.
+
 ## Requirements
 
 - Ansible installed on the control machine
