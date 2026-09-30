@@ -1,18 +1,20 @@
-{# This is a client-only node joining the existing cluster's control plane.
-   existing_cluster_servers (inventory/group_vars/all.yml) is the source of
-   truth for that control plane - it lives in a separate Ansible project
-   (Nomadintosh) that manages cassiopeia/taurus/betelgeuse, so it isn't
-   derivable from this inventory. Any host in *this* inventory marked
-   server.enabled: true is also folded in, in case this group ever grows its
-   own local servers. #}
+{# Both existing_cluster_servers and existing_consul_datacenter are optional.
+   Set them (e.g. via Semaphore variable groups or extra-vars) when this
+   inventory's hosts should join an already-running external control plane -
+   a separate Ansible project (Nomadintosh) that manages its own servers,
+   for instance. Left undefined, this inventory group bootstraps its own
+   datacenter and control plane instead, the same way Nomadintosh's own
+   consul role does: datacenter derived from the group name, retry_join
+   limited to this group's own server.enabled: true hosts. #}
+{% set datacenter = existing_consul_datacenter | default(group_names | reject('equalto', 'all') | reject('equalto', 'ungrouped') | first) %}
 {% set ns = namespace(servers=[]) %}
 {% for host in groups['all'] %}
 {%   if 'server' in hostvars[host] and hostvars[host]['server'] is mapping and hostvars[host]['server']['enabled'] | default(false) %}
 {%     set ns.servers = ns.servers + [host] %}
 {%   endif %}
 {% endfor %}
-{% set retry_join_hosts = (ns.servers + existing_cluster_servers) | unique %}
-datacenter = "{{ existing_consul_datacenter }}"
+{% set retry_join_hosts = (ns.servers + (existing_cluster_servers | default([]))) | unique %}
+datacenter = "{{ datacenter }}"
 node_name  = "{{ inventory_hostname_short }}"
 data_dir   = "{{ consul_working_dir }}"
 

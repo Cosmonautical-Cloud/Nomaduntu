@@ -11,4 +11,4 @@
     name: "{{ item }}"
     state: present
   loop:
-    - "{{ additional_apt_packages }}"
+    - "{{ additional_apt_packages | default([]) }}"

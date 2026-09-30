@@ -4,7 +4,7 @@ Sets the `datacenter` fact used by the `nomad` and `consul` roles.
 
 ## What it does
 
-Derives `datacenter` from the host's inventory group name (the first group that isn't `all` or `ungrouped`) and sets it as a fact. This is purely a Nomad job-placement tag — Consul's datacenter is fixed cluster-wide via `existing_consul_datacenter` and does not use this fact.
+Derives `datacenter` from the host's inventory group name (the first group that isn't `all` or `ungrouped`) and sets it as a fact. This is purely a Nomad job-placement tag — Consul's own datacenter is derived independently in `consul.hcl.j2` (defaulting to the same group name, or `existing_consul_datacenter` when set) and does not use this fact.
 
 ## Requirements
 

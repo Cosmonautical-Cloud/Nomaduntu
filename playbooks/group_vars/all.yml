@@ -1,0 +1,9 @@
+---
+# Loaded automatically for every play in this playbooks/ directory,
+# regardless of what inventory source is used to run them (Ansible loads
+# group_vars/host_vars relative to both the inventory source AND the
+# playbook directory) - unlike inventory/group_vars, this survives Semaphore
+# supplying its own inventory instead of inventory/hosts.yml.
+config_dir: /etc
+
+working_dir: /opt

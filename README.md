@@ -48,7 +48,7 @@ node2.example.com:
 node3.example.com: {}
 ```
 
-Nomad's `datacenter` is derived from the host's inventory group name and is purely a job-placement tag. Consul's `datacenter` is separate and fixed cluster-wide via `existing_consul_datacenter` (`inventory/group_vars/all.yml`) — every host in this inventory is a client-only node that joins an existing Consul/Nomad control plane (`existing_cluster_servers`) managed by a separate Ansible project, rather than bootstrapping its own.
+Nomad's `datacenter` is always derived from the host's inventory group name and is purely a job-placement tag. Consul's `datacenter` defaults to that same group name too, and this inventory group bootstraps its own Consul/Nomad control plane from its own `server.enabled: true` hosts — unless you set `existing_consul_datacenter` and `existing_cluster_servers` (e.g. via Semaphore variable groups or extra-vars), in which case these hosts instead join an already-running external control plane (such as one managed by a separate Ansible project) under that fixed datacenter name.
 
 ## Running the playbook
 

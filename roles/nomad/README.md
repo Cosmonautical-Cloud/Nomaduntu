@@ -6,7 +6,7 @@ Installs and configures [Nomad](https://developer.hashicorp.com/nomad/docs) as a
 
 1. Installs the `nomad` package via APT.
 2. Creates the config (`nomad_config_dir`) and data (`nomad_working_dir`) directories.
-3. Templates `nomad.hcl`, setting `datacenter` from the `facts` role's inventory-group-derived fact, joining the existing control plane (`existing_cluster_servers`) plus any host marked `server.enabled: true`, declaring any `volumes` as host volumes, and enabling the `docker` plugin when `docker.enabled: true`. Validates the rendered config with `nomad config validate` before applying it.
+3. Templates `nomad.hcl`, setting `datacenter` from the `facts` role's inventory-group-derived fact, joining any host marked `server.enabled: true` (plus `existing_cluster_servers`, if set, for joining an already-running external control plane), declaring any `volumes` as host volumes, and enabling the `docker` plugin when `docker.enabled: true`. Validates the rendered config with `nomad config validate` before applying it.
 4. Registers Nomad as a systemd service, restarting it only when the package or config actually changed.
 
 Requires the Hashicorp APT repository to already be configured on the host (see the `apt_repo` role).

@@ -1,6 +1,7 @@
 {# Nomad's own "datacenter" is just a job-placement tag - it's this host's
    inventory group name, distinct from Consul's datacenter (see
-   consul.hcl.j2), which always points at the shared control plane. #}
+   consul.hcl.j2). existing_cluster_servers is optional - see consul.hcl.j2
+   for when/why to set it. #}
 {% set datacenter = group_names | reject('equalto', 'all') | reject('equalto', 'ungrouped') | first %}
 {% set ns = namespace(servers=[]) %}
 {% for host in groups['all'] %}
@@ -8,7 +9,7 @@
 {%     set ns.servers = ns.servers + [host] %}
 {%   endif %}
 {% endfor %}
-{% set retry_join_hosts = (ns.servers + existing_cluster_servers) | unique %}
+{% set retry_join_hosts = (ns.servers + (existing_cluster_servers | default([]))) | unique %}
 datacenter = "{{ datacenter }}"
 name       = "{{ inventory_hostname }}"
 
