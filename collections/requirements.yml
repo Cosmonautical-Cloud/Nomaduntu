@@ -2,3 +2,5 @@
 collections:
   - community.general
   - ansible.posix
+  - name: cosmonautical.notify
+    version: ">=0.0.1"
