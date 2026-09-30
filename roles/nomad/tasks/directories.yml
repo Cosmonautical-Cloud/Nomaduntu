@@ -7,10 +7,15 @@
     owner: root
     group: root
 
+# owner/group nomad (not root) - see the "Running as a non-root user" note in
+# this role's README. recurse fixes up anything left behind from when the
+# client ran as root, including on hosts upgrading into this.
 - name: Ensure Nomad working directory exists
   ansible.builtin.file:
     path: "{{ nomad_working_dir }}"
     state: directory
     mode: '0755'
-    owner: root
-    group: root
+    owner: nomad
+    group: nomad
+    recurse: true
+  register: nomad_directories_result

@@ -1,14 +1,46 @@
 ---
+# The nomad package's own unit ships `User=root`/`Group=root` - its own
+# comment says this is because Nomad *clients* need root (cgroups/chroot for
+# the exec driver, bridge networking, binding <1024). This cluster only ever
+# uses raw_exec and docker, neither of which needs that, so a drop-in
+# overrides it to match Consul's already-non-root pattern (and Nomadintosh's
+# non-root macOS agents). Revisit if the exec driver or bridge networking is
+# ever needed here.
+- name: Ensure Nomad systemd drop-in directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/system/nomad.service.d
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Override Nomad systemd unit to run as the nomad user
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/nomad.service.d/override.conf
+    content: |
+      [Service]
+      User=nomad
+      Group=nomad
+    mode: '0644'
+    owner: root
+    group: root
+  register: nomad_override_result
+
 - name: Reload systemd daemon
   ansible.builtin.systemd_service:
     daemon_reload: true
 
-- name: Restart Nomad (config or package changed)
+- name: Restart Nomad (config, package, permissions, or override changed)
   ansible.builtin.systemd_service:
     name: nomad
     enabled: true
     state: restarted
-  when: nomad_config_result.changed or nomad_package_install.changed | default(false)
+  when: >
+    nomad_config_result.changed or
+    nomad_package_install.changed | default(false) or
+    nomad_directories_result.changed or
+    nomad_override_result.changed or
+    nomad_docker_group_result.changed | default(false)
 
 - name: Ensure Nomad is running
   ansible.builtin.systemd_service:

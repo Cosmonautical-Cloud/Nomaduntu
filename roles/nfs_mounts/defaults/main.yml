@@ -4,6 +4,14 @@
 # (mirrored here for the Ubuntu side).
 nfs_mounts_shares: []
 
+# A share entry's mount_point is optional - when omitted, it defaults to
+# "{{ nfs_mounts_default_dir }}/<name>" so an inventory only has to list
+# {name, export} to add a share (handy from Semaphore variable groups,
+# which otherwise have to spell out the same mount path for every share).
+# /mnt is the conventional Linux mount root, mirroring Nomadintosh's
+# /Volumes default for the macOS side.
+nfs_mounts_default_dir: /mnt
+
 # Same NAS as the cosmonautical/jellify macOS hosts (10.10.37.32, see
 # Nomadintosh's group_vars/all.yml nas_host).
 nas_host: 10.10.37.32

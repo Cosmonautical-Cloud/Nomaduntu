@@ -7,8 +7,8 @@
   ansible.builtin.template:
     src: templates/nomad.hcl.j2
     dest: "{{ nomad_config_dir }}/nomad.hcl"
-    mode: '0644'
-    owner: root
-    group: root
+    mode: '0640'
+    owner: nomad
+    group: nomad
     validate: nomad config validate %s
   register: nomad_config_result

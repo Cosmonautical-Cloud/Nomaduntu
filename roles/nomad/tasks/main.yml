@@ -1,4 +1,30 @@
 ---
+# Pinned ahead of package install so the package's own postinst (which
+# creates this account if missing) finds it already there and reuses it,
+# rather than allocating the next free system uid/gid - left to the package,
+# that number isn't guaranteed the same across hosts (observed 994-999/
+# 982-983 across this cluster's four hosts), which matters once this user
+# owns files on a shared NFS mount that a rescheduled job could touch from
+# any of them.
+- name: Ensure nomad group exists with a fixed gid
+  become: true
+  ansible.builtin.group:
+    name: nomad
+    gid: 900
+    system: true
+    state: present
+
+- name: Ensure nomad user exists with a fixed uid
+  become: true
+  ansible.builtin.user:
+    name: nomad
+    uid: 900
+    group: nomad
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+    state: present
+
 - name: Install Nomad via APT
   become: true
   ansible.builtin.apt:
@@ -9,6 +35,18 @@
 - name: Create Nomad directories
   become: true
   ansible.builtin.import_tasks: directories.yml
+
+# Nomad runs as the non-root "nomad" user (see tasks/service.yml) but still
+# talks to the Docker socket for the docker driver - needs the same group
+# membership `docker.enabled` already grants ansible_user for manual use.
+- name: Add nomad user to the docker group
+  become: true
+  ansible.builtin.user:
+    name: nomad
+    groups: docker
+    append: true
+  when: docker.enabled | default(false)
+  register: nomad_docker_group_result
 
 - name: Apply Nomad configuration
   become: true
