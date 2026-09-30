@@ -6,7 +6,7 @@ All notable changes to this project are documented here. Format based on [Keep a
 
 ### Added
 
-- Depends on the shared [`cosmonautical.notify`](https://github.com/Cosmonautical-Cloud/ansible-collection-notify) collection (`cosmonautical.notify.discord`), the same Discord-webhook role Nomadintosh uses. No task in this playbook calls it yet — it's available for a future notification call site rather than wired in now. The local `inventory/hosts.yml` `notifications: [{type, url}]` var is renamed `discord_webhooks: [{url}]` to match the role's own variable, ahead of that.
+- Depends on the shared [`cosmonautical.notify`](https://github.com/Cosmonautical-Cloud/ansible-collection-notify) collection, the same Discord-webhook module (`cosmonautical.notify.discord`) Nomadintosh uses. No task in this playbook calls it yet — it's available for a future notification call site rather than wired in now. The local `inventory/hosts.yml` `notifications: [{type, url}]` var is renamed `discord_webhooks: [{id, token}]` to match the module's expected args, ahead of that.
 
 ## [1.3.1] - 2026-09-29
 
