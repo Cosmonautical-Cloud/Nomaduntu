@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project follows [semantic versioning](https://semver.org/).
 
+## [1.3.5] - 2026-09-30
+
+### Changed
+
+- Removed the hard dependency on `cosmonautical.notify` (from `galaxy.yml` and `collections/requirements.yml`) while the `cosmonautical` Galaxy namespace is still pending approval and the collection isn't publishable yet. No call site was wired in here yet (see Nomadintosh for the `include_tasks` + `notify_enabled` scaffold pattern used there), so this is just the dependency removal — add `cosmonautical.notify` back once it's live on Galaxy.
+
 ## [1.3.4] - 2026-09-30
 
 ### Docs
