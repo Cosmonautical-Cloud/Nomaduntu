@@ -55,7 +55,15 @@ node3.example.com: {}
 
 Nomad's `datacenter` is always derived from the host's inventory group name and is purely a job-placement tag. Consul's `datacenter` defaults to that same group name too, and this inventory group bootstraps its own Consul/Nomad control plane from its own `server.enabled: true` hosts — unless you set `existing_consul_datacenter` and `existing_cluster_servers` (e.g. via Semaphore variable groups or extra-vars), in which case these hosts instead join an already-running external control plane (such as one managed by a separate Ansible project) under that fixed datacenter name.
 
-## Running the playbook
+## Playbooks
+
+Ansible Galaxy has no synopsis/description field for playbooks shipped inside a collection (unlike roles, which get one from `meta/main.yml`), so this is the canonical place it's documented:
+
+| Playbook | Description |
+|---|---|
+| `playbooks/nomaduntu.yml` | Full deployment — installs and configures Consul, Nomad, Docker, and NFS mounts according to each host's inventory variables. See [What it does](#what-it-does) below for the full breakdown. Idempotent — safe to rerun. |
+
+### Running it
 
 Run a full deployment:
 

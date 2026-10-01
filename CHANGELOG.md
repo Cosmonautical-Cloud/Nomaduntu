@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project follows [semantic versioning](https://semver.org/).
 
+## [2.0.1] - 2026-10-01
+
+### Docs
+
+- Added a `## Playbooks` section to the README naming `playbooks/nomaduntu.yml` with a one-line description, matching the same addition in Nomadintosh. Ansible Galaxy has no synopsis field for playbook content at all (confirmed via `galaxy_importer`'s `PlaybookLoader`, which never sets a `description` the way `RoleLoader` does from `meta/main.yml`) — every role here already has one via its own `meta/main.yml`, so this closes the equivalent gap for the one playbook that doesn't get that treatment.
+
 ## [2.0.0] - 2026-10-01
 
 ### Changed
