@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project follows [semantic versioning](https://semver.org/).
 
+## [2.0.0] - 2026-10-01
+
+### Changed
+
+- **Breaking:** Galaxy namespace moved from the personal `anultravioletaurora` to the now-approved `cosmonautical` namespace (same one `cosmonautical.notify` already publishes under). The collection's fully-qualified name is now `cosmonautical.nomaduntu` instead of `anultravioletaurora.nomaduntu` — anything installing or importing it (including the `Nomadable` playbook, bumped alongside this) needs its `collections/requirements.yml` pin and `import_playbook`/role references updated to match. The GitHub repo location (`Cosmonautical-Cloud/Nomaduntu`) is unchanged; this is purely the Galaxy identity. Previously published `anultravioletaurora.nomaduntu` versions are left in place on Galaxy, just no longer the publish target.
+
 ## [1.3.5] - 2026-09-30
 
 ### Changed
