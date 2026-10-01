@@ -2,6 +2,22 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project follows [semantic versioning](https://semver.org/).
 
+## [3.0.0] - 2026-10-01
+
+### Added
+
+- New `reboot` role and `playbooks/reboot.yml`, matching Nomadintosh's — reboots every host in the inventory one at a time (`serial: 1`, `ansible.builtin.reboot`, 5-minute timeout). This repo had no equivalent before; `Nomadable`'s own `playbooks/reboot.yml` (added alongside this) now composes both OS's reboot playbooks. Added `reboot.zsh` wrapper to match the existing `deploy.zsh`/`check.zsh` scripts.
+
+### Changed
+
+- **Breaking:** `playbooks/nomaduntu.yml` renamed to `playbooks/deploy.yml`. Anything invoking it by filename (`ansible-playbook playbooks/nomaduntu.yml`, `deploy.zsh`/`check.zsh`/`lint.zsh`) or by FQCN (`ansible.builtin.import_playbook: cosmonautical.nomaduntu.nomaduntu`, used by `Nomadable`, bumped alongside this) needs updating to `playbooks/deploy.yml` / `cosmonautical.nomaduntu.deploy`.
+
+### Fixed
+
+- `check.zsh`'s comment said "Run Nomadintosh in check mode" — copy-paste leftover, fixed to say Nomaduntu.
+
+- `.github/workflows/lint.yml`'s syntax-check step ran `ansible-playbook playbooks/nomadintosh.yml` — a copy-paste leftover from Nomadintosh's own workflow that pointed at a file that's never existed in this repo. Fixed to the actual playbook (now `playbooks/deploy.yml`).
+
 ## [2.0.1] - 2026-10-01
 
 ### Docs

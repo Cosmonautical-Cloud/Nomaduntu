@@ -1,4 +1,4 @@
 #! /bin/zsh
 
 # Deploy Nomad and Consul
-ansible-playbook playbooks/nomaduntu.yml
+ansible-playbook playbooks/deploy.yml

@@ -1,4 +1,4 @@
 #! /bin/zsh
 
-# Run Nomadintosh in check mode
-ansible-playbook playbooks/nomaduntu.yml --check --diff
+# Run Nomaduntu in check mode
+ansible-playbook playbooks/deploy.yml --check --diff

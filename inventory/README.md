@@ -1,6 +1,6 @@
 # Inventory File Guide for Nomaduntu
 
-This document explains how to structure your Ansible inventory file (`hosts.yml`) when deploying services using `playbooks/nomaduntu.yml`.
+This document explains how to structure your Ansible inventory file (`hosts.yml`) when deploying services using `playbooks/deploy.yml`.
 
 ## Key Concepts
 
