@@ -3,4 +3,5 @@ galaxy_info:
   author: Violet Caulfield
   description: Sets the datacenter fact used by the nomad and consul roles.
   license: GPL-3.0-only
+  min_ansible_version: "2.15"
 dependencies: []

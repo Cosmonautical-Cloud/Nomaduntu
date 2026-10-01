@@ -2,6 +2,22 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project follows [semantic versioning](https://semver.org/).
 
+## [3.2.1] - 2026-10-01
+
+### Fixed
+
+CI's `ansible-lint` job was failing — this repo had no `.ansible-lint` config at all (unlike Nomadintosh's), so it ran under a different, more exhaustive ruleset. Brought it in line with Nomadintosh's deliberate `profile: moderate` config and fixed the resulting violations:
+
+- New `.ansible-lint`: `profile: moderate`, `exclude_paths: [.github/]` (fixes 5 `yaml[document-start]` failures on `.github/*` files that were never meant to be linted as Ansible content).
+- `roles/*/meta/main.yml` (all 10 roles): added `galaxy_info.min_ansible_version: "2.15"`, the required property `schema[meta]` was failing on.
+- `galaxy.yml`: added the `linux` tag — `galaxy[tags]` requires at least one tag from a fixed allowed set; none of the existing tags qualified.
+- `meta/runtime.yml`: `requires_ansible: ">=2.15"` → `">=2.15.0"` — `meta-runtime[unsupported-version]` requires a full major.minor.patch version.
+- `roles/nfs_mounts/tasks/main.yml`: wrapped the NFS `opts` line (176 chars) under `yaml[line-length]`'s 160-character limit using a YAML double-quoted backslash line-continuation — verified the rendered value is byte-for-byte identical to the original (no behavior change; `ansible.posix.mount` sees the exact same `opts` string).
+
+### Changed
+
+- `.ansible-lint`: `var-naming[no-role-prefix]` added to `skip_list` (same reasoning as Nomadintosh — `nas_host`, `additional_apt_packages`, `volume_mount_path` are public inventory variables the user sets directly; renaming would break existing inventories) and `no-handler` added to `warn_list` (the "Dearmor Hashicorp GPG Key" task in `roles/apt_repo/tasks/main.yml` can't be a real handler — the very next task needs the dearmored keyring immediately, not deferred to end-of-play).
+
 ## [3.2.0] - 2026-10-01
 
 ### Changed

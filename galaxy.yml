@@ -3,7 +3,7 @@ namespace: cosmonautical
 name: nomaduntu
 authors:
   - Violet Caulfield
-version: 3.2.0
+version: 3.2.1
 readme: README.md
 description: An Ansible collection for deploying Nomad + Consul on an Ubuntu cluster.
 license:
@@ -14,6 +14,7 @@ tags:
   - ubuntu
   - homelab
   - hashicorp
+  - linux
 repository: https://github.com/Cosmonautical-Cloud/Nomaduntu
 homepage: https://github.com/Cosmonautical-Cloud/Nomaduntu
 issues: https://github.com/Cosmonautical-Cloud/Nomaduntu/issues

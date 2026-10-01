@@ -24,7 +24,8 @@
         src: "{{ nas_host }}:{{ item.share_export_path }}"
         path: "{{ volume_mount_path }}/{{ item.share_export_path | basename | lower }}"
         fstype: nfs
-        opts: "nfsvers={{ nfs_mounts_version }},rsize={{ nfs_mounts_rsize }},wsize={{ nfs_mounts_wsize }},timeo={{ nfs_mounts_timeo }},retrans={{ nfs_mounts_retrans }},_netdev"
+        opts: "nfsvers={{ nfs_mounts_version }},rsize={{ nfs_mounts_rsize }},wsize={{ nfs_mounts_wsize }},\
+timeo={{ nfs_mounts_timeo }},retrans={{ nfs_mounts_retrans }},_netdev"
         state: mounted
       loop: "{{ nfs_mounts_shares }}"
       loop_control:

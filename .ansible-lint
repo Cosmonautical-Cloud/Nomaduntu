@@ -1,0 +1,18 @@
+---
+profile: moderate
+
+exclude_paths:
+  - .github/
+
+skip_list:
+  # These are public, cross-role inventory variables the user sets directly
+  # in their own group_vars/host_vars (nas_host, additional_apt_packages,
+  # volume_mount_path, etc.) — renaming them to carry a role prefix would
+  # break every existing inventory using this collection.
+  - var-naming[no-role-prefix]
+
+warn_list:
+  # The dearmored keyring has to exist before the very next task (Add
+  # Hashicorp APT Repository) runs, so this can't be deferred to a handler
+  # (which would only run at end of play) without breaking that ordering.
+  - no-handler
