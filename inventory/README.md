@@ -74,7 +74,7 @@ Variables defined directly under a hostname override any group-level `vars` for 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `server.enabled` | `false` | Configures the host as a Nomad/Consul server node |
-| `docker.enabled` | `false` | Installs Docker Engine and enables the Nomad `docker` plugin |
+| `docker.enabled` | _(absent)_ | `true` installs Docker Engine and enables the Nomad `docker` plugin; `false` actively removes Docker Engine; absent leaves the host unmanaged either way (see `roles/docker/README.md`) |
 | `nfs_mounts_shares` | _(absent)_ | List of `{share_export_path}` NFS shares to mount (see below) |
 | `volumes` | _(absent)_ | List of host volumes to expose to the Nomad client (see below) |
 

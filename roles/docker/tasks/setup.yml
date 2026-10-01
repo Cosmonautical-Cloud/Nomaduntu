@@ -1,0 +1,21 @@
+---
+- name: Install Docker Engine via APT
+  become: true
+  ansible.builtin.apt:
+    name: docker.io
+    state: present
+  register: docker_package_install
+
+- name: Enable and start Docker
+  become: true
+  ansible.builtin.systemd_service:
+    name: docker
+    enabled: true
+    state: started
+
+- name: Add ansible_user to the docker group (manual debugging convenience)
+  become: true
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: true

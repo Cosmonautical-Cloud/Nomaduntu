@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project follows [semantic versioning](https://semver.org/).
 
+## [3.2.0] - 2026-10-01
+
+### Changed
+
+- **Breaking (behavioral):** `docker.enabled: false` now actively uninstalls Docker Engine (`roles/docker/tasks/teardown.yml`), instead of being a no-op. The `playbooks/deploy.yml` gate changed from `when: docker.enabled | default(false)` (role skipped entirely unless `true`) to `when: docker.enabled is defined` (role runs whenever the var is set at all, and branches internally on the real boolean), matching Nomadintosh's `docker_desktop`/`podman`/`container` roles. Previously, flipping a host from `true` to `false` left Docker Engine installed and running with no way to remove it through this role. If any host currently relies on `docker.enabled: false` being inert, it will now have Docker Engine removed on the next run — audit inventory before upgrading. `docker.enabled` left absent entirely is still fully unmanaged, as before.
+
+### Docs
+
+- `roles/docker/README.md` and `inventory/README.md` updated for the install/uninstall/absent split above.
+- Fixed stale `anultravioletaurora/Nomadintosh` and `anultravioletaurora/Nomadable` links in `README.md` — both repos moved to the `Cosmonautical-Cloud` GitHub org (see 2.0.0 below); this repo's own README cross-links to them were never updated to match.
+
 ## [3.1.0] - 2026-10-01
 
 ### Added

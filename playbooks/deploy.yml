@@ -33,7 +33,9 @@
     - name: Include Docker role
       ansible.builtin.include_role:
         name: docker
-      when: docker.enabled | default(false)
+      # docker.enabled: false (not just absent) actively tears down an
+      # existing install - see roles/docker/README.md.
+      when: docker.enabled is defined
       tags:
         - docker
         - container-runtime

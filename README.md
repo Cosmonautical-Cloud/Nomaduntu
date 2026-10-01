@@ -10,7 +10,7 @@ An Ansible playbook for deploying [Nomad](https://developer.hashicorp.com/nomad/
 
 ## Scope
 
-This playbook (like its [Nomadintosh](https://github.com/anultravioletaurora/Nomadintosh) counterpart and the [Nomadable](https://github.com/anultravioletaurora/Nomadable) parent that composes them) provisions the Nomad + Consul **agents** themselves — it does not deploy the job specs those agents run. Job specs live in dedicated repos: [`Jellify/Nomad-Jobs`](https://github.com/anultravioletaurora/Nomad-Jobs) (Terraform-managed) and a legacy hand-deployed `nomad-jobs` repo.
+This playbook (like its [Nomadintosh](https://github.com/Cosmonautical-Cloud/Nomadintosh) counterpart and the [Nomadable](https://github.com/Cosmonautical-Cloud/Nomadable) parent that composes them) provisions the Nomad + Consul **agents** themselves — it does not deploy the job specs those agents run. Job specs live in dedicated repos: [`Jellify/Nomad-Jobs`](https://github.com/anultravioletaurora/Nomad-Jobs) (Terraform-managed) and a legacy hand-deployed `nomad-jobs` repo.
 
 ## Requirements
 
@@ -107,5 +107,5 @@ Services are managed as systemd units (Nomad and Consul), and are only restarted
 ## Remarks
 
 - **Platform** — This playbook is tested against Ubuntu 24.04 LTS. Other Ubuntu versions may work but are untested.
-- **Companion project** — [Nomadintosh](https://github.com/anultravioletaurora/Nomadintosh) is the macOS counterpart to this playbook. Nomad's multi-platform support means both clusters can participate in the same datacenter if desired.
-- **Parent project** — [Nomadable](https://github.com/anultravioletaurora/Nomadable) composes this playbook with Nomadintosh into one deployment, dispatching each inventory host to the right child playbook by OS so a single mixed macOS/Ubuntu cluster can be deployed in one run. This is the actual deploy path in practice — running this repo's own `ansible-playbook`/`deploy.zsh` standalone (as described above) still works for Ubuntu-only changes, but Nomadable is what's normally invoked.
+- **Companion project** — [Nomadintosh](https://github.com/Cosmonautical-Cloud/Nomadintosh) is the macOS counterpart to this playbook. Nomad's multi-platform support means both clusters can participate in the same datacenter if desired.
+- **Parent project** — [Nomadable](https://github.com/Cosmonautical-Cloud/Nomadable) composes this playbook with Nomadintosh into one deployment, dispatching each inventory host to the right child playbook by OS so a single mixed macOS/Ubuntu cluster can be deployed in one run. This is the actual deploy path in practice — running this repo's own `ansible-playbook`/`deploy.zsh` standalone (as described above) still works for Ubuntu-only changes, but Nomadable is what's normally invoked.

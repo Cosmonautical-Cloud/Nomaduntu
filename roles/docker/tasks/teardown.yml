@@ -1,0 +1,6 @@
+---
+- name: Uninstall Docker Engine via APT
+  become: true
+  ansible.builtin.apt:
+    name: docker.io
+    state: absent
