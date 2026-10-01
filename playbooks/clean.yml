@@ -7,12 +7,10 @@
       ansible.builtin.group_by:
         key: "os_{{ ansible_facts['os_family'] }}"
 
-- name: Reboot Node
+- name: Clean up stale apt residue
   hosts: os_Debian
   gather_facts: false
-  serial: 1
-  become: true
   tasks:
-    - name: Reboot Node
+    - name: Run apt autoremove
       ansible.builtin.include_role:
-        name: reboot
+        name: clean

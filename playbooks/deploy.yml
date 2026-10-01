@@ -1,51 +1,57 @@
 ---
-- name: Perform Nomaduntu deployment
+- name: Discover host OS family
   hosts: all
   gather_facts: true
   tasks:
-    - name: Gate Nomaduntu deployment to Debian-based systems
-      when: ansible_facts['os_family'] == 'Debian'
-      block:
-        - name: Set datacenter fact
-          ansible.builtin.include_role:
-            name: facts
-          tags:
-            - facts
+    - name: Group hosts by OS family
+      ansible.builtin.group_by:
+        key: "os_{{ ansible_facts['os_family'] }}"
 
-        - name: Include APT Repository
-          ansible.builtin.include_role:
-            name: apt_repo
-          tags:
-            - apt_repo
+- name: Perform Nomaduntu deployment
+  hosts: os_Debian
+  # Facts already gathered in the discovery play above.
+  gather_facts: false
+  tasks:
+    - name: Set datacenter fact
+      ansible.builtin.include_role:
+        name: facts
+      tags:
+        - facts
 
-        - name: Include APT Update
-          ansible.builtin.include_role:
-            name: apt_update
-          tags:
-            - apt_update
+    - name: Include APT Repository
+      ansible.builtin.include_role:
+        name: apt_repo
+      tags:
+        - apt_repo
 
-        - name: Include Docker role
-          ansible.builtin.include_role:
-            name: docker
-          when: docker.enabled | default(false)
-          tags:
-            - docker
-            - container-runtime
+    - name: Include APT Update
+      ansible.builtin.include_role:
+        name: apt_update
+      tags:
+        - apt_update
 
-        - name: Mount NFS shares
-          ansible.builtin.include_role:
-            name: nfs_mounts
-          tags:
-            - nfs_mounts
+    - name: Include Docker role
+      ansible.builtin.include_role:
+        name: docker
+      when: docker.enabled | default(false)
+      tags:
+        - docker
+        - container-runtime
 
-        - name: Include Consul role
-          ansible.builtin.include_role:
-            name: consul
-          tags:
-            - consul
+    - name: Mount NFS shares
+      ansible.builtin.include_role:
+        name: nfs_mounts
+      tags:
+        - nfs_mounts
 
-        - name: Include Nomad role
-          ansible.builtin.include_role:
-            name: nomad
-          tags:
-            - nomad
+    - name: Include Consul role
+      ansible.builtin.include_role:
+        name: consul
+      tags:
+        - consul
+
+    - name: Include Nomad role
+      ansible.builtin.include_role:
+        name: nomad
+      tags:
+        - nomad

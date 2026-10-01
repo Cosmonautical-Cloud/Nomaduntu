@@ -1,0 +1,6 @@
+---
+galaxy_info:
+  author: Violet Caulfield
+  description: Runs apt autoremove to prune packages left behind by upgrades that nothing else depends on anymore.
+  license: GPL-3.0-only
+dependencies: []

@@ -63,6 +63,7 @@ Ansible Galaxy has no synopsis/description field for playbooks shipped inside a 
 |---|---|
 | `playbooks/deploy.yml` | Full deployment — installs and configures Consul, Nomad, Docker, and NFS mounts according to each host's inventory variables. See [What it does](#what-it-does) below for the full breakdown. Idempotent — safe to rerun. |
 | `playbooks/reboot.yml` | Reboots every host in the inventory one at a time (`serial: 1`) via Ansible's `reboot` module, waiting up to 5 minutes for each to come back before moving to the next. Does not run the full deployment; pair it with `playbooks/deploy.yml` if a deploy is also needed. |
+| `playbooks/clean.yml` | Runs `apt autoremove` to prune packages left behind by upgrades that nothing else depends on anymore — see the `clean` role's [README](roles/clean/README.md). Does not run the full deployment. |
 
 ### Running them
 
@@ -76,6 +77,12 @@ Serial reboot all hosts in the inventory:
 
 ```zsh
 ./reboot.zsh
+```
+
+Prune stale apt residue on all hosts:
+
+```zsh
+./clean.zsh
 ```
 
 To limit execution to a single host or group:

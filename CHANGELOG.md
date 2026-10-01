@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project follows [semantic versioning](https://semver.org/).
 
+## [3.1.0] - 2026-10-01
+
+### Added
+
+- New `clean` role and `playbooks/clean.yml` — runs `apt autoremove` to prune packages left behind by upgrades that nothing else depends on anymore. Added `clean.zsh` wrapper to match the existing scripts. `Nomadable`'s own `playbooks/clean.yml` (added alongside this) composes this with Nomadintosh's equivalent.
+
+### Fixed
+
+- **`playbooks/deploy.yml`, `playbooks/reboot.yml`, `playbooks/clean.yml`**: OS filtering moved from a `when: ansible_facts['os_family'] == 'Debian'` block condition to the play level, via a `group_by` discovery play that sorts hosts into `os_Darwin`/`os_Debian` dynamic groups before the real work play runs against `hosts: os_Debian`. This fixes a real bug in `reboot.yml` and `clean.yml`: against a mixed inventory (the normal case when invoked through `Nomadable`, which passes one shared inventory to both child playbooks), the old `hosts: all` plus unconditional task made every host - including macOS ones - get hit a second time once `Nomadable`'s copy of this playbook also ran Nomadintosh's version against the same hosts. `deploy.yml` was already safely gated behind a single block-level `when:` and didn't double-run, but now uses the same idiom as the other playbooks for consistency.
+
 ## [3.0.0] - 2026-10-01
 
 ### Added
