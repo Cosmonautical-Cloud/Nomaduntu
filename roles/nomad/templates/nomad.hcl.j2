@@ -1,8 +1,11 @@
-{# Nomad's own "datacenter" is just a job-placement tag - it's this host's
-   inventory group name, distinct from Consul's datacenter (see
-   consul.hcl.j2). existing_cluster_servers is optional - see consul.hcl.j2
-   for when/why to set it. #}
-{% set datacenter = group_names | reject('equalto', 'all') | reject('equalto', 'ungrouped') | first %}
+{# datacenter is set by the facts role from this host's DNS name
+   (euler.jellify.app -> jellify) - a job-placement tag, distinct from
+   Consul's datacenter (see consul.hcl.j2). existing_cluster_servers is
+   optional - see consul.hcl.j2 for when/why to set it. #}
+{% set nomad_client_meta_merged = {} %}
+{% for d in [nomad_client_meta | default({})] + query('ansible.builtin.vars', *query('ansible.builtin.varnames', '^nomad_client_meta__.+$') | sort) %}
+{%   set _ = nomad_client_meta_merged.update(d) %}
+{% endfor %}
 {% set ns = namespace(servers=[]) %}
 {% for host in groups['all'] %}
 {%   if 'server' in hostvars[host] and hostvars[host]['server'] is mapping and hostvars[host]['server']['enabled'] | default(false) %}
@@ -38,6 +41,19 @@ client {
   {% endif %}
 
   node_class = "worker"
+
+  # Every inventory group this host belongs to, so a job can target any
+  # group with `constraint { attribute = "${meta.inventory_groups}"
+  # operator = "set_contains" value = "<group>" }` - no per-job meta needed.
+  # os_* are the playbook's own group_by groups, not inventory groups.
+  # nomad_client_meta (plus any nomad_client_meta__<suffix> dicts) adds
+  # arbitrary extra keys.
+  meta {
+    inventory_groups = "{{ group_names | reject('in', ['all', 'ungrouped']) | reject('match', 'os_') | sort | join(',') }}"
+{% for key, value in nomad_client_meta_merged | dictsort %}
+    {{ key }} = "{{ value }}"
+{% endfor %}
+  }
 }
 
 plugin "raw_exec" {

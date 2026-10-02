@@ -20,7 +20,7 @@ This playbook (like its [Nomadintosh](https://github.com/Cosmonautical-Cloud/Nom
 
 ## Inventory
 
-Hosts are organised into named groups; the group name becomes the Consul/Nomad [**datacenter**](https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#datacenter) for every host in that group.
+Each host's Nomad [**datacenter**](https://developer.hashicorp.com/nomad/docs/configuration#datacenter) is its DNS domain label (`euler.jellify.app` → `jellify`), and the Consul datacenter is the Consul servers' domain label — so hosts must be listed by fully qualified name. Inventory groups are freeform: use them for roles and Nomad job targeting (every client publishes them as `meta.inventory_groups`), mixing hosts across datacenters.
 
 **Host variables:**
 
@@ -54,7 +54,7 @@ node2.example.com:
 node3.example.com: {}
 ```
 
-Nomad's `datacenter` is always derived from the host's inventory group name and is purely a job-placement tag. Consul's `datacenter` defaults to that same group name too, and this inventory group bootstraps its own Consul/Nomad control plane from its own `server.enabled: true` hosts — unless you set `existing_consul_datacenter` and `existing_cluster_servers` (e.g. via Semaphore variable groups or extra-vars), in which case these hosts instead join an already-running external control plane (such as one managed by a separate Ansible project) under that fixed datacenter name.
+Nomad's `datacenter` is always this host's DNS domain label and is purely a job-placement tag. Consul's `datacenter` is the domain label shared by the inventory's `server.enabled: true` hosts (falling back to this host's own label when the inventory has no servers) — unless you set `existing_consul_datacenter` and `existing_cluster_servers` (e.g. via Semaphore variable groups or extra-vars), in which case these hosts instead join an already-running external control plane (such as one managed by a separate Ansible project) under that fixed datacenter name.
 
 ## Playbooks
 
@@ -96,7 +96,7 @@ ansible-playbook -i inventory/hosts.yml playbooks/deploy.yml --limit <hostname>
 
 For every host, the playbook performs the following steps:
 
-1. **Facts** — asserts the host is running Ubuntu and sets the `datacenter` fact derived from the host's inventory group name.
+1. **Facts** — asserts the host is listed by fully qualified name, and sets the `datacenter` (Nomad: this host's domain label) and `consul_datacenter` (the Consul servers' domain label, or `existing_consul_datacenter`) facts.
 2. **APT repository/update** — adds the HashiCorp apt repository and updates/upgrades packages.
 3. **Docker** _(optional, `docker.enabled: true`)_ — installs Docker Engine, enables the service, and adds `ansible_user` to the `docker` group.
 4. **NFS mounts** _(optional, `nfs_mounts_shares`)_ — mounts NFS shares from `nas_host` at the given mount points via `/etc/fstab`.

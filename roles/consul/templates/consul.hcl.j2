@@ -1,12 +1,11 @@
-{# Both existing_cluster_servers and existing_consul_datacenter are optional.
-   Set them (e.g. via Semaphore variable groups or extra-vars) when this
-   inventory's hosts should join an already-running external control plane -
-   a separate Ansible project (Nomadintosh) that manages its own servers,
-   for instance. Left undefined, this inventory group bootstraps its own
-   datacenter and control plane instead, the same way Nomadintosh's own
-   consul role does: datacenter derived from the group name, retry_join
-   limited to this group's own server.enabled: true hosts. #}
-{% set datacenter = existing_consul_datacenter | default(group_names | reject('equalto', 'all') | reject('equalto', 'ungrouped') | first) %}
+{# consul_datacenter is set by the facts role: the domain label shared by the
+   Consul servers (cassiopeia.cosmonautical.cloud -> cosmonautical), so
+   clients from other domains still join the servers' datacenter.
+   existing_consul_datacenter and existing_cluster_servers are optional - set
+   them (e.g. via Semaphore variable groups or extra-vars) when this run's own
+   inventory doesn't include the real Consul servers and these hosts should
+   join that already-running control plane instead. #}
+{% set datacenter = consul_datacenter %}
 {% set ns = namespace(servers=[]) %}
 {% for host in groups['all'] %}
 {%   if 'server' in hostvars[host] and hostvars[host]['server'] is mapping and hostvars[host]['server']['enabled'] | default(false) %}

@@ -5,10 +5,13 @@
     update_cache: true
     upgrade: dist
 
+# additional_apt_packages is merged with every additional_apt_packages__<suffix>
+# variable visible to the host, so a group can add packages without
+# repeating the all-level list (Ansible replaces lists across precedence).
 - name: Install additional packages
   become: true
   ansible.builtin.apt:
-    name: "{{ item }}"
+    name: >-
+      {{ (additional_apt_packages | default([]))
+         + (query('ansible.builtin.vars', *query('ansible.builtin.varnames', '^additional_apt_packages__.+$') | sort) | flatten) }}
     state: present
-  loop:
-    - "{{ additional_apt_packages | default([]) }}"
