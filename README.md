@@ -28,7 +28,8 @@ Hosts are organised into named groups; the group name becomes the Consul/Nomad [
 |---|---|---|
 | `server.enabled` | `true` / _(absent)_ | Configures the host as a Nomad/Consul server |
 | `docker.enabled` | `true` / _(absent)_ | Installs Docker Engine and enables the Nomad `docker` plugin |
-| `nfs_mounts_shares` | list of `{share_export_path}` | NFS shares to mount from `nas_host` (see `roles/nfs_mounts/defaults/main.yml`). Mount point is always `volume_mount_path` (`/mnt`) + `/<name>`, `<name>` being `share_export_path`'s final path component, lowercased |
+| `nas_host` | NAS address | **Required** whenever `nfs_mounts_shares` is set — the NFS server to mount from. No default; set it in your inventory or extra vars |
+| `nfs_mounts_shares` | list of `{share_export_path}` | NFS shares to mount from `nas_host`. Mount point is always `volume_mount_path` (`/mnt`) + `/<name>`, `<name>` being `share_export_path`'s final path component, lowercased |
 | `volumes` | list of `{name, path}` | Nomad host volumes to declare in `client { }`, typically pointed at an `nfs_mounts_shares` mount point |
 
 Example host definition:
@@ -102,7 +103,7 @@ For every host, the playbook performs the following steps:
 5. **Consul** — creates config/data directories, installs Consul via the HashiCorp apt repository, templates [`consul.hcl`](https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file) with datacenter, node name, server/client mode, and [`retry_join`](https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#retry_join) derived from inventory, validates it, and registers a systemd service.
 6. **Nomad** — creates config/data directories, installs Nomad via the HashiCorp apt repository, templates [`nomad.hcl`](https://developer.hashicorp.com/nomad/docs/configuration) (including [`bootstrap_expect`](https://developer.hashicorp.com/nomad/docs/configuration/server#bootstrap_expect), [`retry_join`](https://developer.hashicorp.com/nomad/docs/configuration/server_join), the `docker` plugin when enabled, and any declared `volumes` as host volumes), validates it, and registers a systemd service running as the non-root `nomad` user (see `roles/nomad/README.md`).
 
-Services are managed as systemd units (Nomad and Consul), and are only restarted when their config, package, or (Nomad only) data directory permissions/user override actually changed.
+Services are managed as systemd units (Nomad and Consul), and are only restarted when their config, package, or (Nomad only) data directory permissions/user override actually changed. Those restarts roll one host at a time — each restarted agent, and the server cluster's autopilot health, must report healthy before the next host is restarted, so a run that changes every server never takes more than one of them out of quorum.
 
 ## Remarks
 
