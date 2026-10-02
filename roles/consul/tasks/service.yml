@@ -3,15 +3,31 @@
   ansible.builtin.systemd_service:
     daemon_reload: true
 
-- name: Restart Consul (config or package changed)
-  ansible.builtin.systemd_service:
-    name: consul
-    enabled: true
-    state: restarted
-  when: consul_config_result.changed or consul_package_install.changed | default(false)
-
+# Restarts roll one host at a time, waiting for each agent and the server
+# cluster to report healthy before moving on, so a run that changes every
+# server never takes more than one of them out of quorum.
 - name: Ensure Consul is running
   ansible.builtin.systemd_service:
     name: consul
     enabled: true
     state: started
+  register: consul_started_result
+
+# A service that was only just started above already picked up everything.
+- name: Record whether Consul needs a restart on this host
+  ansible.builtin.set_fact:
+    consul_restart_needed: >-
+      {{ not consul_started_result.changed and (consul_config_result.changed or consul_package_install.changed | default(false)) }}
+
+- name: Roll Consul restarts across hosts
+  any_errors_fatal: true
+  block:
+    - name: Restart Consul one host at a time
+      ansible.builtin.include_tasks: rolling_restart.yml
+      loop: >-
+        {{ ansible_play_hosts | map('extract', hostvars)
+           | selectattr('consul_restart_needed', 'defined') | selectattr('consul_restart_needed')
+           | map(attribute='inventory_hostname') | list }}
+      loop_control:
+        loop_var: consul_restart_host
+      when: inventory_hostname == ansible_play_hosts[0]

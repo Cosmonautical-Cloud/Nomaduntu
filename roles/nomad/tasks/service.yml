@@ -30,20 +30,36 @@
   ansible.builtin.systemd_service:
     daemon_reload: true
 
-- name: Restart Nomad (config, package, permissions, or override changed)
-  ansible.builtin.systemd_service:
-    name: nomad
-    enabled: true
-    state: restarted
-  when: >
-    nomad_config_result.changed or
-    nomad_package_install.changed | default(false) or
-    nomad_directories_result.changed or
-    nomad_override_result.changed or
-    nomad_docker_group_result.changed | default(false)
-
+# Restarts roll one host at a time, waiting for each agent and the server
+# cluster to report healthy before moving on, so a run that changes every
+# server never takes more than one of them out of quorum.
 - name: Ensure Nomad is running
   ansible.builtin.systemd_service:
     name: nomad
     enabled: true
     state: started
+  register: nomad_started_result
+
+# A service that was only just started above already picked up everything.
+- name: Record whether Nomad needs a restart on this host
+  ansible.builtin.set_fact:
+    nomad_restart_needed: >-
+      {{ not nomad_started_result.changed and (
+           nomad_config_result.changed or
+           nomad_package_install.changed | default(false) or
+           nomad_directories_result.changed or
+           nomad_override_result.changed or
+           nomad_docker_group_result.changed | default(false)) }}
+
+- name: Roll Nomad restarts across hosts
+  any_errors_fatal: true
+  block:
+    - name: Restart Nomad one host at a time
+      ansible.builtin.include_tasks: rolling_restart.yml
+      loop: >-
+        {{ ansible_play_hosts | map('extract', hostvars)
+           | selectattr('nomad_restart_needed', 'defined') | selectattr('nomad_restart_needed')
+           | map(attribute='inventory_hostname') | list }}
+      loop_control:
+        loop_var: nomad_restart_host
+      when: inventory_hostname == ansible_play_hosts[0]

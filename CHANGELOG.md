@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project follows [semantic versioning](https://semver.org/).
 
+## [3.3.0] - 2026-10-02
+
+### Changed
+
+- `consul`/`nomad`: restarts after a config/package (and, for Nomad, data-directory permission, user-override, or docker-group) change now roll one host at a time instead of firing on every host in parallel — same behavior as Nomadintosh 3.2.0. Each host's flag is recorded (`consul_restart_needed`/`nomad_restart_needed`), then the first play host loops over the flagged ones, delegating a `systemd` restart to each and waiting for it to report healthy before moving on — Consul: `/v1/status/leader` non-empty, then `/v1/operator/autopilot/health` `Healthy`; Nomad: `/v1/agent/health`, then `/v1/operator/autopilot/health` `Healthy`. A host that never gets healthy within `*_restart_retries` × `*_restart_delay` (default 36 × 5s) fails the whole run (`any_errors_fatal`). "Ensure … is running" now runs before the restart decision, and a service it just started isn't restarted again.
+
 ## [3.2.1] - 2026-10-01
 
 ### Fixed
