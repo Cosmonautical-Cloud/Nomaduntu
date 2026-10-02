@@ -6,7 +6,26 @@ This document explains how to structure your Ansible inventory file (`hosts.yml`
 
 ### Datacenter derivation
 
-The **group name** each host belongs to becomes its Nomad **and** (by default) its Consul **datacenter** — both derived automatically from `group_names` at runtime, via the `facts` role. Every host in the `jellify` group defaults to the `jellify` datacenter, and so on.
+The Nomad and Consul **datacenters come from DNS**, not from inventory groups — no variable to set (the `facts` role resolves them):
+
+- **Nomad datacenter** = the host's second-to-last DNS label: `euler.jellify.app` → `jellify`.
+- **Consul datacenter** = that same label taken from the Consul servers (`server.enabled: true` hosts), which must all share one domain. A Consul datacenter is a separate cluster with its own servers, so a client in another domain still joins the servers' datacenter. With no servers in the inventory, it's this host's own label — unless `existing_consul_datacenter` (below) is set.
+
+So **every inventory host must be listed by its fully qualified name** (`host.<datacenter>.<tld>`) — the run fails up front otherwise. Use `ansible_host` to connect by IP.
+
+### Inventory groups
+
+Groups are freeform — a host can be in any number, across datacenters. Every Nomad client publishes its groups as node meta (`inventory_groups = "game_servers,jellify"`), so a job can target one with:
+
+```hcl
+constraint {
+  attribute = "${meta.inventory_groups}"
+  operator  = "set_contains"
+  value     = "game_servers"
+}
+```
+
+`nomad_client_meta` (a dict, merged with any `nomad_client_meta__<suffix>` dicts) adds extra keys. `additional_apt_packages` is likewise merged with any `additional_apt_packages__<suffix>` lists, so a group can add packages without repeating the `all`-level list.
 
 ### Servers vs. clients
 
@@ -18,10 +37,10 @@ If this inventory group has no `server.enabled: true` hosts of its own (e.g. a S
 
 | Variable | Effect |
 |---|---|
-| `existing_consul_datacenter` | Fixes Consul's `datacenter` to this value instead of deriving it from the group name. Nomad's own `datacenter` is unaffected — it's always the group name, since it's purely a job-placement tag. |
+| `existing_consul_datacenter` | Fixes Consul's `datacenter` to this value instead of deriving it from the servers' domain. Nomad's own `datacenter` is unaffected — it's always this host's own domain label. |
 | `existing_cluster_servers` | A list of hostnames/IPs merged into `retry_join` for **both** Consul and Nomad, on top of whatever `server.enabled: true` hosts this run already found. |
 
-Left unset, this inventory group bootstraps its own datacenter and control plane from its own `server.enabled: true` hosts, matching how Nomadintosh's own Consul role self-derives its datacenter. Setting both instead makes these hosts join an already-running external control plane under a fixed datacenter name — see `roles/consul/templates/consul.hcl.j2` for the exact precedence.
+Left unset, the datacenter comes from the inventory's `server.enabled: true` hosts' domain, matching Nomadintosh. Setting both instead makes these hosts join an already-running external control plane under a fixed datacenter name — see `roles/consul/templates/consul.hcl.j2` for the exact precedence.
 
 ### `retry_join`
 
@@ -65,8 +84,9 @@ Variables defined directly under a hostname override any group-level `vars` for 
 | `ansible_ssh_private_key_file` | Path to the SSH private key |
 | `ansible_password` | SSH password (if not using key auth) |
 | `ansible_become_password` | `sudo` password |
-| `additional_apt_packages` | List of extra APT packages to install on every host |
-| `existing_consul_datacenter` | Fixes Consul's datacenter instead of deriving it from the group name (see above) |
+| `additional_apt_packages` | List of extra APT packages to install on every host. Merged with any `additional_apt_packages__<suffix>` lists |
+| `nomad_client_meta` | Dict of extra Nomad client `meta` keys. Merged with any `nomad_client_meta__<suffix>` dicts |
+| `existing_consul_datacenter` | Fixes Consul's datacenter instead of deriving it from the servers' domain (see above) |
 | `existing_cluster_servers` | Extra hosts merged into Consul's and Nomad's `retry_join` (see above) |
 | `nas_host` | Address of the NFS server `nfs_mounts_shares` are mounted from. **Required** if any host sets `nfs_mounts_shares` — no default |
 

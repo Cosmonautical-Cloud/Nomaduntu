@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented here. Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project follows [semantic versioning](https://semver.org/).
 
+## [5.0.0] - 2026-10-02
+
+### Breaking
+
+- **Datacenters come from DNS instead of inventory group names.** A host's Nomad datacenter is its second-to-last DNS label (`euler.jellify.app` → `jellify`). Consul's is `existing_consul_datacenter` if set, else the label shared by the inventory's `server.enabled` hosts, else this host's own label — previously it defaulted to the host's own *group name*, so a client-only run with servers in the same inventory but a different group bootstrapped the wrong datacenter unless `existing_consul_datacenter` was set. The `facts` role now runs first on every deploy, tagged `always`, and fails on hosts not listed by fully qualified name or on Consul servers spanning more than one domain. Matches Nomadintosh 5.0.0. Inventory groups are now free for roles and Nomad meta; a host in several groups no longer risks landing in the wrong datacenter (the old rule took the first group alphabetically).
+
+### Added
+
+- `nomad`: every client publishes its inventory groups as node meta `inventory_groups` (comma-separated, excluding `all`/`ungrouped`/the playbook's own `os_*` groups), so jobs can target any inventory group with a `set_contains` constraint. `nomad_client_meta` adds extra keys. **Changes `nomad.hcl` on every host**, so the first deploy rolling-restarts every Nomad agent.
+- `additional_apt_packages` and `nomad_client_meta` are merged with every `<name>__<suffix>` variable visible to the host, so a group can add to the `all`-level value without repeating it. Same convention as Nomadintosh.
+
+### Fixed
+
+- `playbooks/deploy.yml`: `--tags` runs did nothing. The OS-discovery `group_by` task had no tags, so any `--tags` run skipped it and the deployment play matched no hosts; it's now tagged `always`. The role includes also didn't `apply` their tags to the included tasks, so even with discovery fixed, e.g. `--tags nomad` skipped every Nomad task.
+
 ## [4.0.0] - 2026-10-02
 
 ### Breaking
