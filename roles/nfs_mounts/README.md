@@ -24,7 +24,7 @@ nfs_mounts_shares:
 |---|---|---|
 | `nfs_mounts_shares` | `[]` | Opt-in per host — see above |
 | `volume_mount_path` | `/mnt` | Parent directory every share mounts under — the conventional Linux mount root, mirroring Nomadintosh's `/Volumes` on the macOS side |
-| `nas_host` | `10.10.37.32` | Same NAS as the cosmonautical/jellify macOS hosts (see Nomadintosh's `playbooks/group_vars/all.yml`) |
+| `nas_host` | _(none — required)_ | The NFS server's address. Site-specific, so it must come from your inventory (`group_vars`/`host_vars`) or extra vars; the role fails before touching anything if a host has `nfs_mounts_shares` but no `nas_host` |
 | `nfs_mounts_version` | `3` | The NAS only speaks NFSv3 (confirmed on the macOS side 2026-09-21, same NAS here) |
 | `nfs_mounts_rsize` / `nfs_mounts_wsize` | `65536` | Read/write buffer size |
 | `nfs_mounts_timeo` | `100` | RPC timeout in tenths of a second before retransmit — same tuning as the macOS mounts, raised from the kernel default of 7 (0.7s) so a slow-but-alive NAS under concurrent load doesn't get piled on with redundant retransmits |

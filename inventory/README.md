@@ -68,6 +68,7 @@ Variables defined directly under a hostname override any group-level `vars` for 
 | `additional_apt_packages` | List of extra APT packages to install on every host |
 | `existing_consul_datacenter` | Fixes Consul's datacenter instead of deriving it from the group name (see above) |
 | `existing_cluster_servers` | Extra hosts merged into Consul's and Nomad's `retry_join` (see above) |
+| `nas_host` | Address of the NFS server `nfs_mounts_shares` are mounted from. **Required** if any host sets `nfs_mounts_shares` — no default |
 
 ### Host variables (set per-host)
 

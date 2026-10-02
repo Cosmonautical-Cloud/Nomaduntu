@@ -28,7 +28,8 @@ Hosts are organised into named groups; the group name becomes the Consul/Nomad [
 |---|---|---|
 | `server.enabled` | `true` / _(absent)_ | Configures the host as a Nomad/Consul server |
 | `docker.enabled` | `true` / _(absent)_ | Installs Docker Engine and enables the Nomad `docker` plugin |
-| `nfs_mounts_shares` | list of `{share_export_path}` | NFS shares to mount from `nas_host` (see `roles/nfs_mounts/defaults/main.yml`). Mount point is always `volume_mount_path` (`/mnt`) + `/<name>`, `<name>` being `share_export_path`'s final path component, lowercased |
+| `nas_host` | NAS address | **Required** whenever `nfs_mounts_shares` is set — the NFS server to mount from. No default; set it in your inventory or extra vars |
+| `nfs_mounts_shares` | list of `{share_export_path}` | NFS shares to mount from `nas_host`. Mount point is always `volume_mount_path` (`/mnt`) + `/<name>`, `<name>` being `share_export_path`'s final path component, lowercased |
 | `volumes` | list of `{name, path}` | Nomad host volumes to declare in `client { }`, typically pointed at an `nfs_mounts_shares` mount point |
 
 Example host definition:

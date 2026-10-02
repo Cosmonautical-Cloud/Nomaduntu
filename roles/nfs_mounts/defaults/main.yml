@@ -2,7 +2,6 @@
 # See README.md for the rationale behind each of these.
 nfs_mounts_shares: []
 volume_mount_path: /mnt
-nas_host: 10.10.37.32
 nfs_mounts_version: 3
 nfs_mounts_rsize: 65536
 nfs_mounts_wsize: 65536

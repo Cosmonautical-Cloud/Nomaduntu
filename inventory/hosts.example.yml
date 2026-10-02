@@ -4,6 +4,10 @@ all:
     # SSH connection settings — applied to every host
     ansible_user: youruser
 
+    # NFS server to mount nfs_mounts_shares from - required if any host sets
+    # nfs_mounts_shares (no default)
+    # nas_host: 192.0.2.10
+
     # Extra APT packages to install on every host (optional)
     additional_apt_packages:
       - htop
